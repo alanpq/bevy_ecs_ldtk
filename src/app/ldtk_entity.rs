@@ -295,10 +295,10 @@ pub trait LdtkEntity {
     fn bundle_entity(
         entity_instance: &EntityInstance,
         layer_instance: &LayerInstance,
-        tileset: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] tileset: Option<&Handle<Image>>,
         tileset_definition: Option<&TilesetDefinition>,
         asset_server: &AssetServer,
-        texture_atlases: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] texture_atlases: &mut Assets<TextureAtlas>,
     ) -> Self;
 }
 
@@ -306,10 +306,10 @@ impl LdtkEntity for EntityInstanceBundle {
     fn bundle_entity(
         entity_instance: &EntityInstance,
         _: &LayerInstance,
-        _: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] _: Option<&Handle<Image>>,
         _: Option<&TilesetDefinition>,
         _: &AssetServer,
-        _: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] _: &mut Assets<TextureAtlas>,
     ) -> Self {
         EntityInstanceBundle {
             entity_instance: entity_instance.clone(),
@@ -317,19 +317,21 @@ impl LdtkEntity for EntityInstanceBundle {
     }
 }
 
+#[cfg(feature = "render")]
 impl LdtkEntity for SpriteBundle {
     fn bundle_entity(
         _: &EntityInstance,
         _: &LayerInstance,
-        tileset: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] tileset: Option<&Handle<Image>>,
         _: Option<&TilesetDefinition>,
         _: &AssetServer,
-        _: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] _: &mut Assets<TextureAtlas>,
     ) -> Self {
         utils::sprite_bundle_from_entity_info(tileset)
     }
 }
 
+#[cfg(feature = "render")]
 impl LdtkEntity for SpriteSheetBundle {
     fn bundle_entity(
         entity_instance: &EntityInstance,
@@ -353,10 +355,10 @@ impl LdtkEntity for Worldly {
     fn bundle_entity(
         entity_instance: &EntityInstance,
         _: &LayerInstance,
-        _: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] _: Option<&Handle<Image>>,
         _: Option<&TilesetDefinition>,
         _: &AssetServer,
-        _: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] _: &mut Assets<TextureAtlas>,
     ) -> Worldly {
         Worldly::from_entity_info(entity_instance)
     }
@@ -366,10 +368,10 @@ impl LdtkEntity for GridCoords {
     fn bundle_entity(
         entity_instance: &EntityInstance,
         layer_instance: &LayerInstance,
-        _: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] _: Option<&Handle<Image>>,
         _: Option<&TilesetDefinition>,
         _: &AssetServer,
-        _: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] _: &mut Assets<TextureAtlas>,
     ) -> Self {
         GridCoords::from_entity_info(entity_instance, layer_instance)
     }
@@ -395,10 +397,10 @@ pub trait PhantomLdtkEntityTrait {
         commands: &'b mut EntityCommands<'w, 's, 'a>,
         entity_instance: &EntityInstance,
         layer_instance: &LayerInstance,
-        tileset: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] tileset: Option<&Handle<Image>>,
         tileset_definition: Option<&TilesetDefinition>,
         asset_server: &AssetServer,
-        texture_atlases: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] texture_atlases: &mut Assets<TextureAtlas>,
     ) -> &'b mut EntityCommands<'w, 's, 'a>;
 }
 
@@ -408,18 +410,18 @@ impl<B: LdtkEntity + Bundle> PhantomLdtkEntityTrait for PhantomLdtkEntity<B> {
         entity_commands: &'b mut EntityCommands<'w, 's, 'a>,
         entity_instance: &EntityInstance,
         layer_instance: &LayerInstance,
-        tileset: Option<&Handle<Image>>,
+        #[cfg(feature = "render")] tileset: Option<&Handle<Image>>,
         tileset_definition: Option<&TilesetDefinition>,
         asset_server: &AssetServer,
-        texture_atlases: &mut Assets<TextureAtlas>,
+        #[cfg(feature = "render")] texture_atlases: &mut Assets<TextureAtlas>,
     ) -> &'b mut EntityCommands<'w, 's, 'a> {
         entity_commands.insert(B::bundle_entity(
             entity_instance,
             layer_instance,
-            tileset,
+            #[cfg(feature = "render")] tileset,
             tileset_definition,
             asset_server,
-            texture_atlases,
+            #[cfg(feature = "render")] texture_atlases,
         ))
     }
 }

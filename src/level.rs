@@ -32,12 +32,14 @@ use bevy_ecs_tilemap::StandardTilemapBundle as TilemapBundle;
 
 use thiserror::Error;
 
+#[cfg(feature = "render")]
 #[derive(Error, Debug)]
 enum BackgroundImageError {
     #[error("background image handle not loaded into the image assets store")]
     ImageNotLoaded,
 }
 
+#[cfg(feature = "render")]
 fn background_image_sprite_sheet_bundle(
     images: &Assets<Image>,
     texture_atlases: &mut Assets<TextureAtlas>,
@@ -206,11 +208,11 @@ fn tile_in_layer_bounds(tile: &TileInstance, layer_instance: &LayerInstance) -> 
 #[allow(clippy::too_many_arguments)]
 pub fn spawn_level(
     level: LoadedLevel,
-    background_image: &Option<Handle<Image>>,
+    #[cfg(feature = "render")] background_image: &Option<Handle<Image>>,
     commands: &mut Commands,
     asset_server: &AssetServer,
-    images: &Assets<Image>,
-    texture_atlases: &mut Assets<TextureAtlas>,
+    #[cfg(feature = "render")] images: &Assets<Image>,
+    #[cfg(feature = "render")] texture_atlases: &mut Assets<TextureAtlas>,
     ldtk_entity_map: &LdtkEntityMap,
     ldtk_int_cell_map: &LdtkIntCellMap,
     entity_definition_map: &HashMap<i32, &EntityDefinition>,
@@ -226,6 +228,7 @@ pub fn spawn_level(
 
     let mut layer_z = 0;
 
+    #[cfg(feature = "render")]
     if ldtk_settings.level_background == LevelBackground::Rendered {
         let translation = Vec3::new(*level.px_wid() as f32, *level.px_hei() as f32, 0.) / 2.;
 
@@ -294,10 +297,10 @@ pub fn spawn_level(
                         let predicted_worldly = Worldly::bundle_entity(
                             entity_instance,
                             layer_instance,
-                            tileset,
+                            #[cfg(feature = "render")] tileset,
                             tileset_definition,
                             asset_server,
-                            texture_atlases,
+                            #[cfg(feature = "render")] texture_atlases,
                         );
 
                         if !worldly_set.contains(&predicted_worldly) {
@@ -322,10 +325,10 @@ pub fn spawn_level(
                                 &mut entity_commands,
                                 entity_instance,
                                 layer_instance,
-                                tileset,
+                                #[cfg(feature = "render")] tileset,
                                 tileset_definition,
                                 asset_server,
-                                texture_atlases,
+                                #[cfg(feature = "render")] texture_atlases,
                             );
 
                             entity_commands.insert(SpatialBundle {

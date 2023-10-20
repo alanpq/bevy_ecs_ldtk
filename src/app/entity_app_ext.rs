@@ -147,10 +147,10 @@ mod tests {
         fn bundle_entity(
             _: &EntityInstance,
             _: &LayerInstance,
-            _: Option<&Handle<Image>>,
+            #[cfg(feature = "render")] _: Option<&Handle<Image>>,
             _: Option<&TilesetDefinition>,
             _: &AssetServer,
-            _: &mut Assets<TextureAtlas>,
+            #[cfg(feature = "render")] _: &mut Assets<TextureAtlas>,
         ) -> LdtkEntityBundle {
             LdtkEntityBundle::default()
         }
