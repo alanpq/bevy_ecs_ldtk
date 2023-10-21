@@ -1,6 +1,8 @@
 use quote::quote;
 
+#[cfg(feature = "render")]
 static SPRITE_BUNDLE_ATTRIBUTE_NAME: &str = "sprite_bundle";
+#[cfg(feature = "render")]
 static SPRITE_SHEET_BUNDLE_ATTRIBUTE_NAME: &str = "sprite_sheet_bundle";
 static WORLDLY_ATTRIBUTE_NAME: &str = "worldly";
 static GRID_COORDS_ATTRIBUTE_NAME: &str = "grid_coords";
@@ -24,26 +26,29 @@ pub fn expand_ldtk_entity_derive(ast: syn::DeriveInput) -> proc_macro::TokenStre
         let field_name = field.ident.as_ref().unwrap();
         let field_type = &field.ty;
 
-        let sprite_bundle = field
-            .attrs
-            .iter()
-            .find(|a| *a.path.get_ident().as_ref().unwrap() == SPRITE_BUNDLE_ATTRIBUTE_NAME);
-        if let Some(attribute) = sprite_bundle {
-            field_constructions.push(expand_sprite_bundle_attribute(
-                attribute, field_name, field_type,
-            ));
-            continue;
-        }
 
-        let sprite_sheet_bundle = field
-            .attrs
-            .iter()
-            .find(|a| *a.path.get_ident().as_ref().unwrap() == SPRITE_SHEET_BUNDLE_ATTRIBUTE_NAME);
-        if let Some(attribute) = sprite_sheet_bundle {
-            field_constructions.push(expand_sprite_sheet_bundle_attribute(
-                attribute, field_name, field_type,
-            ));
-            continue;
+        #[cfg(feature = "render")] {
+            let sprite_bundle = field
+                .attrs
+                .iter()
+                .find(|a| *a.path.get_ident().as_ref().unwrap() == SPRITE_BUNDLE_ATTRIBUTE_NAME);
+            if let Some(attribute) = sprite_bundle {
+                field_constructions.push(expand_sprite_bundle_attribute(
+                    attribute, field_name, field_type,
+                ));
+                continue;
+            }
+
+            let sprite_sheet_bundle = field
+                .attrs
+                .iter()
+                .find(|a| *a.path.get_ident().as_ref().unwrap() == SPRITE_SHEET_BUNDLE_ATTRIBUTE_NAME);
+            if let Some(attribute) = sprite_sheet_bundle {
+                field_constructions.push(expand_sprite_sheet_bundle_attribute(
+                    attribute, field_name, field_type,
+                ));
+                continue;
+            }
         }
 
         let worldly = field
@@ -106,7 +111,7 @@ pub fn expand_ldtk_entity_derive(ast: syn::DeriveInput) -> proc_macro::TokenStre
     } else {
         quote! {}
     };
-
+    #[cfg(feature = "render")]
     let gen = quote! {
         impl #impl_generics bevy_ecs_ldtk::prelude::LdtkEntity for #struct_name #ty_generics #where_clause {
             fn bundle_entity(
@@ -114,8 +119,24 @@ pub fn expand_ldtk_entity_derive(ast: syn::DeriveInput) -> proc_macro::TokenStre
                 layer_instance: &bevy_ecs_ldtk::prelude::LayerInstance,
                 tileset: Option<&bevy::prelude::Handle<bevy::prelude::Image>>,
                 tileset_definition: Option<&bevy_ecs_ldtk::prelude::TilesetDefinition>,
-                asset_server: &bevy::prelude::AssetServer,
+                asset_server: &bevy_asset::prelude::AssetServer,
                 texture_atlases: &mut bevy::prelude::Assets<bevy::prelude::TextureAtlas>,
+            ) -> Self {
+                Self {
+                    #(#field_constructions)*
+                    #struct_update
+                }
+            }
+        }
+    };
+    #[cfg(not(feature = "render"))]
+    let gen = quote! {
+        impl #impl_generics bevy_ecs_ldtk::prelude::LdtkEntity for #struct_name #ty_generics #where_clause {
+            fn bundle_entity(
+                entity_instance: &bevy_ecs_ldtk::prelude::EntityInstance,
+                layer_instance: &bevy_ecs_ldtk::prelude::LayerInstance,
+                tileset_definition: Option<&bevy_ecs_ldtk::prelude::TilesetDefinition>,
+                asset_server: &bevy_asset::prelude::AssetServer,
             ) -> Self {
                 Self {
                     #(#field_constructions)*
@@ -127,6 +148,7 @@ pub fn expand_ldtk_entity_derive(ast: syn::DeriveInput) -> proc_macro::TokenStre
     gen.into()
 }
 
+#[cfg(feature = "render")]
 fn expand_sprite_bundle_attribute(
     attribute: &syn::Attribute,
     field_name: &syn::Ident,
@@ -172,6 +194,7 @@ fn expand_sprite_bundle_attribute(
     }
 }
 
+#[cfg(feature = "render")]
 fn expand_sprite_sheet_bundle_attribute(
     attribute: &syn::Attribute,
     field_name: &syn::Ident,
