@@ -35,7 +35,7 @@ rand = "0.8"
 bevy-inspector-egui = "0.19.0"
 
 [features]
-default = ["derive", "internal_levels"]
+default = ["derive", "render", "internal_levels"]
 derive = ["bevy_ecs_ldtk_macros"]
 atlas = ["bevy_ecs_tilemap/atlas"]
 render = ["bevy_ecs_tilemap/render", "bevy_ecs_ldtk_macros/render"]
